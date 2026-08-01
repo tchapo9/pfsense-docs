@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkpfsense=self.webpackChunkpfsense||[]).push([["668"],{6569(e,s,r){r.r(s),r.d(s,{default:()=>f});var a=r(4848);r(6540);var n=r(4164),u=r(4308),c=r(8287),p=r(2831),t=r(1085);function f(e){return(0,a.jsx)(u.e3,{className:(0,n.A)(c.G.wrapper.docsPages),children:(0,a.jsx)(t.A,{children:(0,p.v)(e.route.routes)})})}}}]);
