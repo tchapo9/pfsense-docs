@@ -1,0 +1,961 @@
+---
+title: "Pfsense Tuto"
+---
+
+> Pfsense
+
+# Installation et Configuration
+
+Le site : https://repo.ialab.dsu.edu/pfsense/
+![Screenshot](/img/portsentry/Ok.png)
+
+![Screenshot](/img/portsentry/image_053.png)
+
+# Prérequis Matériels physique
+
+• Un ordinateur
+• Minimum 2 Go de RAM
+• Au moins 8 Go d'espace disque
+• Deux interfaces réseau (WAN et LAN)
+• Une clé USB booter (au moins 4 Go) pour l'installation
+
+# Prérequis sur VirtualBox
+
+• Avoir VirtualBox installé.
+• Ouvrez VirtualBox et cliquez sur "Nouvelle".
+• Montez l'image ISO téléchargée précédemment.
+• Type : Linux
+
+## Configuration de l’interface WAN de Pfsense
+
+Par défaut, pfSense bloque l'accès à son interface d'administration via WAN, sauf si vous ajoutez une règle spécifique. Exposé directement cette interface à Internet est risqué.
+
+![Screenshot](/img/portsentry/image_054.png)
+
+## Configuration de l’interface LAN de Pfsense
+
+Le LAN permet de gérer pfsense en interne, sans risque d'attaques extérieures.
+
+![Screenshot](/img/portsentry/image_055.png)
+
+![Screenshot](/img/portsentry/image_056.png)
+
+On démarrage notre pfsense
+
+![Screenshot](/img/portsentry/image_057.png)
+
+On clique Entrée sur Accept
+
+![Screenshot](/img/portsentry/image_058.png)
+
+On sélectionne Install puis OK et Entrée
+
+![Screenshot](/img/portsentry/image_059.png)
+
+On sélectionne Auto (2FS) puis OK et Entrée
+
+![Screenshot](/img/portsentry/image_060.png)
+
+On sélectionne install puis Select et Entrée
+
+![Screenshot](/img/portsentry/image_061.png)
+
+On sélectionne stripe puis OK et Entrée
+
+![Screenshot](/img/portsentry/image_062.png)
+
+On cliquer la touche espace
+
+![Screenshot](/img/portsentry/image_063.png)
+
+On verra un truc comme (\*) puis OK et Entrée
+
+![Screenshot](/img/portsentry/image_064.png)
+
+On place comme (YES) puis Entrée
+
+![Screenshot](/img/portsentry/image_065.png)
+
+![Screenshot](/img/portsentry/image_066.png)
+
+```bash
+Reboot
+```
+
+![Screenshot](/img/portsentry/image_067.png)
+
+Dès qu’on arrivée encore sur cette page à nouveau apres le Reboot on arret la machine virtuelle pour passer à la suppression l’iso pour éviter que l’installation ne recommence indéfiniment
+
+![Screenshot](/img/portsentry/image_068.png)
+
+![Screenshot](/img/portsentry/image_069.png)
+
+![Screenshot](/img/portsentry/image_070.png)
+
+![Screenshot](/img/portsentry/image_071.png)
+
+VLANs : Non configurés pour l’instant. Ils peuvent être ajoutés plus tard via l'interface web pourr séparer logiquement des groupes d’appareils sans utiliser de matériel supplémentaire.
+
+![Screenshot](/img/portsentry/image_072.png)
+
+Taper em0 : Pour donner à l’interface (interface principale pour l'accès à Internet).
+
+![Screenshot](/img/portsentry/image_073.png)
+
+Taper em1 : Pour assignée em1 à Interface LAN (interface pour le réseau interne).
+
+![Screenshot](/img/portsentry/image_074.png)
+
+Confirmé la configuration en répondant ‘y’ à la question
+
+![Screenshot](/img/portsentry/image_075.png)
+
+On clique sur ENTRE
+
+![Screenshot](/img/portsentry/image_076.png)
+
+WAN (em0) : Adresse IP attribuée via DHCP = 192.168.1.20/24
+
+LAN (em1) : Adresse IP statique 192.168.1.1/24
+
+L'accès à l'interface web de pfSense peut se faire via 192.168.1.1 depuis le réseau LAN.
+
+Modifications sont nécessaires
+
+Option de 2
+
+Configuration pour ajuster les adresses IP des interfaces interfaces pfsense
+
+![Screenshot](/img/portsentry/image_077.png)
+
+Ici on veut configurer l’interface LAN donc 2 pour numero de l’interface
+
+![Screenshot](/img/portsentry/image_078.png)
+
+(n) pour refuser d'utiliser DHCP pour IPv4, ce qui signifie qu'il faudra entrer une adresse IP manuellement pour le réseau local. La configuration manuelle du LAN est souvent mieux pour éviter les changements d'adresse IP a cause du DHCP et faciliter l'accès à l'interface web de pfSense.
+
+![Screenshot](/img/portsentry/image_079.png)
+
+Adresse IP
+
+![Screenshot](/img/portsentry/image_080.png)
+
+Définition une adresse IP fixe pour l’interface LAN
+
+Définition du masque reseau
+
+![Screenshot](/img/portsentry/image_081.png)
+
+DHCP6
+
+![Screenshot](/img/portsentry/image_082.png)
+
+On choisit de ne pas utiliser de DHCP6 sur cette interface LAN avec n et cliquer sur Entre pour ne pas fixer l’address nous meme
+
+Serveur DHCP
+
+![Screenshot](/img/portsentry/image_083.png)
+
+On taper y pour OUI a l’activation du serveur DHCP pour distribuer automatiquement des adresses IP aux clients du réseau local.
+
+Définition de la plage d'adresses pour les clients DHCP :
+
+Début : 10.10.10.10
+
+Fin : 10.10.10.30
+
+Le protocol HTTP
+
+![Screenshot](/img/portsentry/image_084.png)
+
+Le HTTP est activé comme protocole webConfigurator. Elle permet d’accéder à l'interface Web à l'aide de http://10.10.10.254/ pour la gestion des règles de pare-feu
+
+PfSense
+
+Le menu de la console pfsense
+
+![Screenshot](/img/portsentry/image_085.png)
+
+Maintenant nous allons choisir une Machine, puis le configuré dans le Reseau interne LAN. Pour gérer pfsense en interne, sans risque
+
+![Screenshot](/img/portsentry/image_086.png)
+
+Reseau
+
+![Screenshot](/img/portsentry/image_087.png)
+
+Démarrage de la machine du reseau interne LAN
+
+![Screenshot](/img/portsentry/image_088.png)
+
+Nous allons maintenant démarrer la machine dans le réseau LAN afin d'accéder à l'interface web de pfSense.
+
+Après le démarrage s’assuré que la machine est bien connectée au réseau local (LAN) et qu'elle reçoit une adresse IP automatiquement via DHCP comme nous avons activé sur notre interface la distribuer automatiquement des adresses IP aux clients du réseau local.
+
+IP
+
+![Screenshot](/img/portsentry/image_089.png)
+
+ifconfig, notre interface réseau enp0s3 a bien reçu l'adresse 10.10.10.10 avec un masque de sous-réseau 255.255.255.0
+
+Serveur DHCP sur pfSense fonctionne correctement et a attribué une adresse IP à ta machine.
+
+## Accès à l'interface web de pfSense
+
+Ouvre un navigateur web
+
+Tape l'adresse IP de l'interface LAN de pfSense (dans notre cas http://10.10.10.254 selon notre configuration).
+
+![Screenshot](/img/portsentry/image_090.png)
+
+```bash
+Se connecte avec les identifiants administrateur (par défaut : admin / pfsense).
+```
+
+Page de configuration initiale de pfSense.
+
+![Screenshot](/img/portsentry/image_091.png)
+
+Assistant de configuration Wizard : pfSense propose un assistant pour guider à travers les premières étapes de la configuration.
+
+![Screenshot](/img/portsentry/image_092.png)
+
+La société derrière pfSense, offre un support technique 24h/24 et 7j/7.
+
+![Screenshot](/img/portsentry/image_093.png)
+
+Domaine: "tchedre" vous pouvez le changer si vous voulez
+
+Next
+
+![Screenshot](/img/portsentry/image_094.png)
+
+Next
+
+![Screenshot](/img/portsentry/image_095.png)
+
+![Screenshot](/img/portsentry/image_096.png)
+
+Next
+
+![Screenshot](/img/portsentry/image_097.png)
+
+Next
+
+![Screenshot](/img/portsentry/image_098.png)
+
+On change le mot de passe de l’admin pour plus de sécurité
+
+Next
+
+![Screenshot](/img/portsentry/image_099.png)
+
+On recharge les configurations avec Reload
+
+![Screenshot](/img/portsentry/image_100.png)
+
+Finish pour finir
+
+![Screenshot](/img/portsentry/image_101.png)
+
+Accept
+
+![Screenshot](/img/portsentry/image_102.png)
+
+Close
+
+![Screenshot](/img/portsentry/image_103.png)
+
+![Screenshot](/img/portsentry/image_104.png)
+
+![Screenshot](/img/portsentry/image_105.png)
+
+![Screenshot](/img/portsentry/image_106.png)
+
+> Proxy
+
+![Screenshot](/img/portsentry/image_107.png)
+
+![Screenshot](/img/portsentry/image_108.png)
+
+![Screenshot](/img/portsentry/image_109.png)
+
+![Screenshot](/img/portsentry/image_110.png)
+
+![Screenshot](/img/portsentry/image_111.png)
+
+![Screenshot](/img/portsentry/image_112.png)
+
+![Screenshot](/img/portsentry/image_113.png)
+
+![Screenshot](/img/portsentry/image_114.png)
+
+![Screenshot](/img/portsentry/image_115.png)
+
+Config NAT
+
+![Screenshot](/img/portsentry/image_116.png)
+
+![Screenshot](/img/portsentry/image_117.png)
+
+![Screenshot](/img/portsentry/image_118.png)
+
+![Screenshot](/img/portsentry/image_119.png)
+
+![Screenshot](/img/portsentry/image_120.png)
+
+> DMZ
+
+# DMZ vers WAN
+
+Autorisé pour que les services dans la DMZ puissent communiquer avec Internet (par exemple, un serveur web pour des clients externe).
+
+# Limiter ou interdire l'accès de la DMZ au LAN
+
+La DMZ est une zone "exposée" : elle contient des serveurs accessibles depuis Internet (WAN), ce qui la rend plus vulnérable aux attaques.
+
+Si un attaquant prend le contrôle d'un serveur dans la DMZ, il pourrait tenter de l'utiliser comme point d'accès pour pénétrer dans le réseau interne (LAN), où se trouvent les ressources sensibles (données, postes de travail, serveurs internes).
+
+![Screenshot](/img/portsentry/image_121.png)
+
+```bash
+Ip des interfaces du serveur PfSense
+```
+
+![Screenshot](/img/portsentry/image_122.png)
+
+```bash
+IP du serveurWeb dans DMZ
+```
+
+![Screenshot](/img/portsentry/image_123.png)
+
+```bash
+IP du serveur dans le LAN
+```
+
+![Screenshot](/img/portsentry/image_124.png)
+
+```bash
+Ip du Client depuis le WAN
+```
+
+![Screenshot](/img/portsentry/image_125.png)
+
+# REGLES A CONFIGURER
+
+INTERFACE WAN (rules)
+
+![Screenshot](/img/portsentry/image_126.png)
+
+INTERFACE LAN (rules)
+
+![Screenshot](/img/portsentry/image_127.png)
+
+INTERFACE DMZ (rules)
+
+![Screenshot](/img/portsentry/image_128.png)
+
+PORT FORWARDING (NAT)
+
+![Screenshot](/img/portsentry/image_129.png)
+
+NAT OUTBOUND
+
+![Screenshot](/img/portsentry/image_130.png)
+
+Testez l’accès à Internet depuis la machine du DMZ en faisant la mise à jour des paquets
+
+![Screenshot](/img/portsentry/image_131.png)
+
+Testez la connexion à Apache, depuis une machine du réseau « LAN » en saisissant, dans la barre d’adresses du navigateur, l’IP du ServeurWeb du DMZ (ici http://20.20.20.10) :
+
+![Screenshot](/img/portsentry/image_132.png)
+
+# Test de l’accès au serveur web depuis l’extérieur :
+
+Depuis un navigateur d’une machine extérieure, saisissez l’adresse IP publique (ou la WAN ou un sousdomaine hébergé) de votre pfSENSE : votre page Apache doit s’afficher :
+
+![Screenshot](/img/portsentry/image_133.png)
+
+> Portail Captif
+
+# Portail Captif avec Authentification Utilisateur
+
+PfSense dispose d’un portail captif. Le portail captif force les clients d’un réseau à afficher une page Web d’authentification avant de pouvoir se connecter à Internet.
+
+Il est utilisé dans des réseaux qui assurent un accès public tels que les espaces d’accueil, établissement scolaires
+
+NB : Ne pas modifier le langage de l’interface en Français avant la configuration du portail car il y a un Bug lors de la sauvegarde des modifications dans certaines versions.
+
+En revanche, une fois la configuration terminée et validée, vous pouvez modifier la langue de l’interface en Français.
+
+![Screenshot](/img/portsentry/image_134.png)
+
+# Configuration du Portail Captif
+
+Sélectionner : Services – Captive Portal
+
+![Screenshot](/img/portsentry/image_135.png)
+
+Cliquez sur « + Add »
+
+![Screenshot](/img/portsentry/image_136.png)
+
+Renseigner le Nom du Portail Captif et sa description. Pour l’exemple : « PORTAIL »
+
+![Screenshot](/img/portsentry/image_137.png)
+
+- Activer ‘Enable Captive Portal’
+
+- Sélectionner l’interface ‘LAN’
+
+- Maximum concurrent connections : 1 (Limite le nombre de connexions simultanées d’un même utilisateur)
+
+- Idle timeout (Minutes) : Choisir entre 1 à 5 (Les clients seront déconnectés après cette période d’inactivité)
+
+![Screenshot](/img/portsentry/image_138.png)
+
+![Screenshot](/img/portsentry/image_139.png)
+
+- Sélectionner « Use an Authentication backend »
+
+- Sélectionner « Local Database » pour « Authentication Server »
+
+- Attention : Ne pas sélectionner « Local Database » pour « Secondary Authentication Server »
+
+- Activer « Local Authentication Privileges » (Autoriser uniquement les utilisateurs avec les droits de « Connexion au portail captif »)
+
+![Screenshot](/img/portsentry/image_140.png)
+
+Puis cliquez « Save »
+
+Résultat
+
+![Screenshot](/img/portsentry/image_141.png)
+
+# Configuration des Utilisateurs pour la délégation du Portail Captif
+
+Création d’un utilisateur qui aura autorisés à se connecter au Portail Captif.
+
+Sélectionner : System – User Manager
+
+![Screenshot](/img/portsentry/image_142.png)
+
+Onglet « Users » , cliquez sur « + Add »
+
+![Screenshot](/img/portsentry/image_143.png)
+
+![Screenshot](/img/portsentry/image_144.png)
+
+Puis cliquez « Save »
+
+![Screenshot](/img/portsentry/image_145.png)
+
+![Screenshot](/img/portsentry/image_146.png)
+
+- Onglet « Users », cliquez sur « Modifier »
+
+- On descend jusqu’au Effective Privilèges « Add »
+
+![Screenshot](/img/portsentry/image_147.png)
+
+On sélectionne “utilisateur Services : connexion au portail captif ” puis on sauvegarde
+
+![Screenshot](/img/portsentry/image_148.png)
+
+Puis cliquez « Save »
+
+![Screenshot](/img/portsentry/image_149.png)
+
+Puis cliquez « Save »
+
+Sélectionner : Status – Captive Portal
+
+![Screenshot](/img/portsentry/image_150.png)
+
+Le « Statut du Portail Captif » permet de voir les utilisateurs connectés et de les déconnecter si besoin
+
+![Screenshot](/img/portsentry/image_151.png)
+
+Essayons d’accéder sur un site par exemple google.com, automatique on nous rédige vers la page de portail
+
+Nous allons utiliser la machine cliente Ubuntu100-1 La machine Ubuntu étant dans le Reseau LAN et que le DHCP est activé sur l’interface L du serveur PfSense il se retrouvera attribuer un adresse IP automatiquement
+
+![Screenshot](/img/portsentry/image_152.png)
+
+![Screenshot](/img/portsentry/image_153.png)
+
+Le symbole '?' devant le filaire connecté indique que nous n’avons pas accès à Internet par un réseau filaire (Ethernet),
+
+![Screenshot](/img/portsentry/image_154.png)
+
+Tentative de commande Ping vers l'adresse IP publique 8.8.8.8 (le serveur DNS de Google)
+
+![Screenshot](/img/portsentry/image_155.png)
+
+![Screenshot](/img/portsentry/image_156.png)
+
+La capture ci-dessous montre qu’on s’est connecté avec succès
+
+Connexion
+
+![Screenshot](/img/portsentry/image_157.png)
+
+![Screenshot](/img/portsentry/image_158.png)
+
+La capture d'écran montre que le système est connecté à un réseau filaire (Ethernet), d'accès Internet.
+
+Les utilisateurs connectés
+
+![Screenshot](/img/portsentry/image_159.png)
+
+![Screenshot](/img/portsentry/image_160.png)
+
+![Screenshot](/img/portsentry/image_161.png)
+
+![Screenshot](/img/portsentry/image_162.png)
+
+![Screenshot](/img/portsentry/image_163.png)
+
+![Screenshot](/img/portsentry/image_164.png)
+
+![Screenshot](/img/portsentry/image_165.png)
+
+On redemarre on peut également déconnecter tous les utilisateurs pour qu’il se reconnecte dès qu’il vont taper google.com ou autre ils seront automatiquement redirigés sur la page de connexion de notre portail
+
+![Screenshot](/img/portsentry/image_166.png)
+
+![Screenshot](/img/portsentry/image_167.png)
+
+> Squid
+
+![Screenshot](/img/portsentry/image_168.png)
+
+![Screenshot](/img/portsentry/image_169.png)
+
+![Screenshot](/img/portsentry/image_170.png)
+
+Installez ensuite les paquets Lightsquid, SQUID et SQUIDGUARD.
+
+![Screenshot](/img/portsentry/image_170.png)
+
+![Screenshot](/img/portsentry/image_171.png)
+
+![Screenshot](/img/portsentry/image_172.png)
+
+![Screenshot](/img/portsentry/image_173.png)
+
+![Screenshot](/img/portsentry/image_174.png)
+
+![Screenshot](/img/portsentry/image_175.png)
+
+![Screenshot](/img/portsentry/image_176.png)
+
+Save
+
+![Screenshot](/img/portsentry/image_177.png)
+
+![Screenshot](/img/portsentry/image_178.png)
+
+![Screenshot](/img/portsentry/image_179.png)
+
+![Screenshot](/img/portsentry/image_180.png)
+
+![Screenshot](/img/portsentry/image_181.jpeg)
+
+![Screenshot](/img/portsentry/image_182.jpeg)
+
+![Screenshot](/img/portsentry/image_183.jpeg)
+
+![Screenshot](/img/portsentry/image_184.jpeg)
+
+![Screenshot](/img/portsentry/image_185.jpeg)
+
+![Screenshot](/img/portsentry/image_186.jpeg)
+
+![Screenshot](/img/portsentry/image_187.jpeg)
+
+![Screenshot](/img/portsentry/image_188.jpeg)
+
+![Screenshot](/img/portsentry/image_189.jpeg)
+
+![Screenshot](/img/portsentry/image_190.png)
+
+![Screenshot](/img/portsentry/image_191.png)
+
+![Screenshot](/img/portsentry/image_192.png)
+
+Save
+
+![Screenshot](/img/portsentry/image_193.png)
+
+![Screenshot](/img/portsentry/image_194.png)
+
+![Screenshot](/img/portsentry/image_195.png)
+
+![Screenshot](/img/portsentry/image_196.png)
+
+![Screenshot](/img/portsentry/image_197.png)
+
+![Screenshot](/img/portsentry/image_198.png)
+
+![Screenshot](/img/portsentry/image_199.png)
+
+![Screenshot](/img/portsentry/image_200.png)
+
+![Screenshot](/img/portsentry/image_201.png)
+
+![Screenshot](/img/portsentry/image_202.png)
+
+URL pour télécharger un ensemble de site à bloquer https://dsi.ut-capitole.fr/blacklists/download/
+
+![Screenshot](/img/portsentry/image_203.png)
+
+http://dsi.ut-capitole.fr/blacklists/download/chat.tar.gz
+
+![Screenshot](/img/portsentry/image_204.png)
+
+![Screenshot](/img/portsentry/image_205.png)
+
+![Screenshot](/img/portsentry/image_206.png)
+
+![Screenshot](/img/portsentry/image_207.png)
+
+![Screenshot](/img/portsentry/image_208.png)
+
+![Screenshot](/img/portsentry/image_209.png)
+
+![Screenshot](/img/portsentry/image_210.png)
+
+![Screenshot](/img/portsentry/image_211.png)
+
+![Screenshot](/img/portsentry/image_212.png)
+
+![Screenshot](/img/portsentry/image_213.png)
+
+![Screenshot](/img/portsentry/image_214.png)
+
+![Screenshot](/img/portsentry/image_215.png)
+
+![Screenshot](/img/portsentry/image_216.jpeg)
+
+![Screenshot](/img/portsentry/image_217.png)
+
+![Screenshot](/img/portsentry/image_218.png)
+
+![Screenshot](/img/portsentry/image_219.jpeg)
+
+![Screenshot](/img/portsentry/image_220.png)
+
+![Screenshot](/img/portsentry/image_221.png)
+
+![Screenshot](/img/portsentry/image_222.png)
+
+![Screenshot](/img/portsentry/image_223.png)
+
+![Screenshot](/img/portsentry/image_224.png)
+
+> OpenVPN
+
+OpenVPN est un logiciel de réseau privé virtuel (VPN) open source qui permet de créer des connexions sécurisées entre des réseaux distants. C’est un VPN SSL intégral qui met en œuvre une extension réseau sécurisée de niveau 2 ou 3 OSI grâce au protocole standard du secteur SSL/TLS. Il supporte des méthodes d'authentification client variées basées sur des certificats, des cartes à puce et/ou des identifiants utilisateur/mot de passe, tout en permettant des politiques d'accès spécifiques à l'utilisateur ou au groupe via l'application de règles de pare-feu sur l'interface VPN virtuelle. OpenVPN n'agit pas en tant que proxy d'application web et ne fonctionne pas par le biais d'un navigateur internet.
+
+https://openvpn.net/community-resources/how-to/
+
+## OpenVPN prend en charge plusieurs types de connexions :
+
+## VPN Site-to-Site
+
+Un VPN site à site est une connexion entre deux ou plusieurs réseaux. Interconnecter deux entités via un VPN afin qu'elles puissent partager leurs ressources comme si elles étaient sur le même réseau, alors c'est bien un VPN site-to-site.
+
+![Screenshot](/img/portsentry/image_225.png)
+
+## VPN Point-à-Point (P2P VPN
+
+Un réseau privé virtuel (P2P) est un type de VPN compatible avec un réseau peer-to-peer. Un réseau peer-to-peer permet aux utilisateurs de transmettre et de recevoir des données sur le réseau via plusieurs nœuds plutôt qu'à un seul endroit, car chaque membre ou pair agit comme un point de connexion potentiel. Elle connecte deux appareils directement via un tunnel sécurisé. Utilisé pour connecter deux serveurs, ordinateurs ou équipements IoT. Plus simple qu’un VPN site-to-site, mais limité à deux machines. Exemple : Un serveur A envoie des données chiffrées à un serveur B.
+
+![Screenshot](/img/portsentry/image_226.png)
+
+## VPN d'Accès à Distance (Remote Access VPN)
+
+Le VPN d'accès à distance garantit que les connexions entre les réseaux d'entreprise et les appareils distants et mobiles sont sécurisées, et peuvent être accessibles pratiquement partout où se trouvent les utilisateurs
+
+![Screenshot](/img/portsentry/image_227.png)
+
+![Screenshot](/img/portsentry/image_228.png)
+
+# La gestion des certificats
+
+Nous devons créer une autorité de certification interne sur le firewall PfSense, puis nous allons créer un certificat dédié au serveur. Ce certificat sera utilisé pour sécuriser notre tunnel VPN.
+
+## Créer l'autorité de certification
+
+Pour créer l'autorité de certification sur pfSense (si vous n'en avez pas déjà une), vous devez accéder au menu : System > Cert. Manager
+
+Dans l'onglet "Authorities", cliquez sur le bouton "Add".
+
+![Screenshot](/img/portsentry/image_229.png)
+
+## Créer le certificat Server
+
+Nous allons créer un certificat de type "Server" en nous basant sur notre nouvelle autorité de certification. Toujours dans "Certificate Manager", cette fois-ci dans l'onglet "Certificates", cliquez sur le bouton "Add".
+
+Choisissez la méthode "Create an Internal Certificate" nom (VPN_ACC) et sélectionnez l'autorité de certification au niveau du paramètre "Certificate authority".
+
+Par défaut, la validité du certificat est fixée à 3650 jours soit 10 ans. Le "Common Name" correspond là aussi au nom intégré dans le certificat, si vous souhaitez établir une connexion VPN basée sur un nom de domaine, il est préférable d'indiquer cette valeur ici.
+
+![Screenshot](/img/portsentry/image_230.png)
+
+![Screenshot](/img/portsentry/image_231.png)
+
+On choisit le type de certificat (Certificate Type) suivant : Server Certificate. Puis Save pour sauvegarder
+
+![Screenshot](/img/portsentry/image_232.png)
+
+La partie certificat est terminée, passons à la suite.
+
+# Créer les utilisateurs locaux
+
+Nous allons utiliser une base de compte interne au Pare-feu dans cet exemple. On va donc créer nos utilisateurs ainsi qu'un certificat de type "User" pour l'authentification VPN.
+
+System User Manager
+
+![Screenshot](/img/portsentry/image_233.png)
+
+Add
+
+![Screenshot](/img/portsentry/image_234.png)
+
+Pour créer l'utilisateur, il faut indiquer un identifiant, un mot de passe... Ainsi que cocher l'option "Click to create a user certificate" : cela va ajouter le formulaire de création du certificat juste en dessous. Pour créer le certificat, on se base sur notre autorité de certification.
+
+![Screenshot](/img/portsentry/image_235.png)
+
+![Screenshot](/img/portsentry/image_236.png)
+
+![Screenshot](/img/portsentry/image_237.png)
+
+Lorsque l'utilisateur est créé, il apparaît bien dans la base locale :
+
+![Screenshot](/img/portsentry/image_238.png)
+
+Nos deux clients( ami et clevy)
+
+## Configurer le serveur OpenVPN
+
+Maintenant que la partie certificat est opérationnelle et que nous disposons d'un compte utilisateur, on peut s'attaquer à la configuration du VPN.
+
+Cliquez sur le menu "VPN" puis "OpenVPN"
+
+![Screenshot](/img/portsentry/image_239.png)
+
+Dans l'onglet "Servers", cliquez sur "Add" pour créer une nouvelle configuration.
+
+![Screenshot](/img/portsentry/image_240.png)
+
+La première chose à faire, c'est de choisir le "Server Mode" suivant :
+
+Remote Access (SSL/TLS + User Auth).
+
+Pour le VPN, le protocole s'appuie sur de l'UDP, avec le port 1194 par défaut. Pour l'interface, nous allons conserver "WAN" puisque c'est bien par cette interface que l'on va se connecter en accès distant.
+
+![Screenshot](/img/portsentry/image_241.png)
+
+![Screenshot](/img/portsentry/image_242.png)
+
+Au niveau de la partie chiffrement, un peu plus bas dans la page, nous allons sélectionner notre autorité de certification au niveau du champ "Peer Certificate Authority". En complément, sélectionnez le certificat Server au niveau du champ "Server certificate".
+
+![Screenshot](/img/portsentry/image_243.png)
+
+Pour l'algorithme de chiffrement (Encryption Algorithm), nous allons choisir l'AES-256-CBC. La sécurité sera renforcée, mais cela impact légèrement les performances, car le processus de chiffrement est alourdi : il sera toujours possible de modifier cette valeur. Il n'est pas nécessaire de modifier les autres options liées au chiffrement.
+
+![Screenshot](/img/portsentry/image_244.png)
+
+Passons maintenant à la configuration de notre tunnel VPN en lui-même.
+
+- IPv4 Tunnel Network : adresse du réseau VPN, c'est-à-dire que lorsqu'un client va se connecter en VPN il obtiendra une adresse IP dans ce réseau au niveau de la carte réseau locale du PC
+
+- Redirect IPv4 Gateway : si vous cochez cette option, vous passez sur un full tunnel c'est-à-dire que tous les flux réseau du PC distant vont passer dans le VPN, sinon nous sommes en split-tunnel
+
+- IPv4 Local network : les adresses réseau des LAN que vous souhaitez rendre accessibles via ce tunnel VPN. Dans mon exemple, je souhaite rendre accessible le réseau 10.10.10.0/24 via le VPN. Si vous avez plusieurs valeurs à indiquer, il faut les séparer par une virgule
+
+- Concurrent connections : le nombre de connexions VPN simultanés que vous autorisez.
+
+![Screenshot](/img/portsentry/image_245.png)
+
+```bash
+Si vous avez besoin de plus de 60 connexions VPN en simultanés, vous ne devez pas utiliser un réseau VPN en /24, mais vous devez prendre plus large. Dans ce cas, modifiez la valeur "IPv4 Tunnel Network" définie précédemment.
+```
+
+![Screenshot](/img/portsentry/image_246.png)
+
+Descendez dans la page... On s'approche de la fin. Dans la zone "Custom options", indiquez : auth-nocache. Cette option offre une protection supplémentaire contre le vol des identifiants en refusant la mise en cache.
+
+![Screenshot](/img/portsentry/image_247.png)
+
+Save
+
+On passe a la configuration de notre Machine de l’entreprise pour fixé l’address ip
+
+![Screenshot](/img/portsentry/image_248.png)
+
+Activation du bureau à distance
+
+Parametre bureau à distance
+
+![Screenshot](/img/portsentry/image_249.png)
+
+Activation
+
+![Screenshot](/img/portsentry/image_250.png)
+
+![Screenshot](/img/portsentry/image_251.png)
+
+![Screenshot](/img/portsentry/image_252.png)
+
+Ouvrir les paramètres des comptes
+
+![Screenshot](/img/portsentry/image_253.png)
+
+Cliquez sur Comptes (comme indiqué dans l'image).
+
+Créer un compte local
+
+![Screenshot](/img/portsentry/image_254.png)
+
+![Screenshot](/img/portsentry/image_255.png)
+
+Add
+
+![Screenshot](/img/portsentry/image_256.png)
+
+# Exporter la configuration OpenVPN
+
+Pour télécharger la configuration au format ".ovpn", il est nécessaire d'installer un paquet supplémentaire sur notre pare-feu. Rendez-vous dans le menu suivant : System > Package Manager > Available Packages.
+
+Recherchez "openvpn" et installez le paquet : openvpn-client-export.
+
+![Screenshot](/img/portsentry/image_257.png)
+
+![Screenshot](/img/portsentry/image_258.png)
+
+On confirme l’installation
+
+![Screenshot](/img/portsentry/image_259.png)
+
+Lorsque c'est fait, retournez dans le menu "OpenVPN" puis dans l'onglet "Client Export".
+
+![Screenshot](/img/portsentry/image_260.png)
+
+On souhaite utiliser l'adresse IP publique pour vous connecter, utilisons l'option "Interface IP Address" pour l'option "Host Name Resolution".
+
+![Screenshot](/img/portsentry/image_261.png)
+
+![Screenshot](/img/portsentry/image_262.png)
+
+Cliquez sur le bouton "Save as default" en bas de page.
+
+En dessous de la part configuration, nous avons la possibilité de télécharger la configuration. Pour utiliser OpenVPN Community, il faudra prendre la configuration "Bundled Configuration", au format archive pour récupérer tous les fichiers nécessaires.
+
+Pour l'utilisation sur mobile avec OpenVPN Connect, prenez la configuration "Inline Configuration".
+
+Si vous avez besoin de récupérer le client OpenVPN pour Windows (ou Mac via Viscosity), vous pouvez l'avoir depuis cette page également
+
+![Screenshot](/img/portsentry/image_263.png)
+
+![Screenshot](/img/portsentry/image_264.png)
+
+# Créer les règles de firewall pour OpenVPN
+
+D'une part, nous devons créer une règle pour autoriser les clients à monter la connexion VPN, et d'autre part nous devons créer une ou plusieurs règles pour autoriser l'accès aux ressources : serveur en RDP, serveur de fichiers, application web, etc.
+
+## Autoriser le flux OpenVPN
+
+Cliquez sur le menu "Firewall" > "WAN". Il est nécessaire de créer une nouvelle règle pour l'interface WAN, en sélectionnant le protocole UDP.
+
+![Screenshot](/img/portsentry/image_265.png)
+
+![Screenshot](/img/portsentry/image_266.png)
+
+Validez la création de la règle et appliquez la configuration.
+
+![Screenshot](/img/portsentry/image_267.png)
+
+À partir de ce moment-là, il est possible de monter le tunnel VPN sur un PC, mais les ressources de votre entreprise seront inaccessibles.
+
+## Autoriser les flux vers les ressources
+
+La règle qui suit sert à autoriser l'accès en RDP à l'hôte 10.10.10.20 (qui fait bien parti du réseau autorisé dans la configuration du VPN) au travers du tunnel VPN. Vous devez créer une ou plusieurs règles en fonction des ressources auxquelles vos utilisateurs doivent accéder via le VPN, en limitant les flux au maximum.
+
+![Screenshot](/img/portsentry/image_268.png)
+
+Pour la destination, ce sera donc mon hôte et le port 3389 pour le RDP. De la même façon que pour la règle précédente, indiquez une description et activez la journalisation si vous le souhaitez.
+
+![Screenshot](/img/portsentry/image_269.png)
+
+La configuration est terminée... Il ne reste plus qu'à tester !
+
+# Tester l'accès distant depuis un poste client
+
+Sur mon PC Windows 10, je commence par installer le client OpenVPN... Ce qui se fait très facilement, sans difficulté particulière !
+
+![Screenshot](/img/portsentry/image_270.png)
+
+![Screenshot](/img/portsentry/image_271.png)
+
+![Screenshot](/img/portsentry/image_272.png)
+
+L’archive ZIP
+
+![Screenshot](/img/portsentry/image_273.png)
+
+Voici le contenu de l'archive ZIP téléchargée :
+
+![Screenshot](/img/portsentry/image_274.png)
+
+Dans le dossier "C:\Programmes\OpenVPN\Config" extraire le contenu de l'archive ZIP téléchargée depuis le Pfsense et qui contient la configuration. Nous allons créer un sous-dossier dans le dossier "config" pour chaque client.
+
+![Screenshot](/img/portsentry/image_275.png)
+
+![Screenshot](/img/portsentry/image_276.png)
+
+![Screenshot](/img/portsentry/image_277.png)
+
+Ensuite, sur l'icône OpenVPN effectuez un clic droit et cliquez sur "Connecter".
+
+![Screenshot](/img/portsentry/image_278.png)
+
+Vous devez fournir le nom d'utilisateur et le mot de passe, correspondant à un compte AD ou un compte local du pare-feu, en fonction de la configuration.
+
+![Screenshot](/img/portsentry/image_279.png)
+
+![Screenshot](/img/portsentry/image_280.png)
+
+Le tunnel VPN est monté et actif
+
+![Screenshot](/img/portsentry/image_281.png)
+
+```bash
+Si l'on effectue un ipconfig sur le PC, nous pouvons voir que l'on a bien une adresse IP sur la plage 100.100.100.0, avec un sous-réseau en /30 pour l'isolation des clients.
+```
+
+![Screenshot](/img/portsentry/image_282.png)
+
+Il ne reste plus qu'à établir une connexion sur vos serveurs, via RDP
+
+![Screenshot](/img/portsentry/image_283.png)
+
+![Screenshot](/img/portsentry/image_284.png)
+
+![Screenshot](/img/portsentry/image_285.png)
+
+![Screenshot](/img/portsentry/image_286.png)
+
+![Screenshot](/img/portsentry/image_287.png)
+
+![Screenshot](/img/portsentry/image_288.png)
+
+![Screenshot](/img/portsentry/image_289.png)
+
+![Screenshot](/img/portsentry/image_290.png)
+
+![Screenshot](/img/portsentry/image_291.png)
