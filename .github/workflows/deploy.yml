@@ -5,8 +5,9 @@ on:
     branches:
       - main
 
+# Autorise GitHub Actions à créer et pousser la branche gh-pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -15,31 +16,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Récupération du code source
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
           fetch-depth: 0
 
+      # Installation de Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-          cache: "npm"
+          cache: npm
 
+      # Installation des dépendances
       - name: Install dependencies
         run: npm ci
 
-      - name: Build site
+      # Construction du site Docusaurus
+      - name: Build Docusaurus
         run: npm run build
 
+      # Publication sur GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./build
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          user_name: "github-actions[bot]"
-          user_email: "github-actions[bot]@users.noreply.github.com"
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
           allow_empty_commit: true
