@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkpfsense=self.webpackChunkpfsense||[]).push([["983"],{4453(e){e.exports=JSON.parse('{"metadata":{"permalink":"/pfsense-docs/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
