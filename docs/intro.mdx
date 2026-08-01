@@ -4,8 +4,55 @@ sidebar_position: 1
 
 # Introduction
 
-Le projet pfsense est une distribution personnalisée open source gratuite de FreeBSD conçue pour être utilisée comme pare-feu et routeur, entièrement gérée par une interface Web facile à utiliser. Cette interface Web est connue sous le nom de configurateur d'interface graphique Web, ou WebGUI en abrégé. Aucune connaissance de FreeBSD n'est requise pour déployer et utiliser le logiciel pfSense.
+**pfSense** est une distribution **open source** basée sur **FreeBSD**, conçue pour fournir des services de **pare-feu (Firewall)**, de **routage** et de **sécurité réseau**. Grâce à son interface d'administration Web intuitive (**WebGUI**), il peut être installé, configuré et administré sans nécessiter de connaissances approfondies de FreeBSD.
 
-En plus d'être une plate-forme de pare-feu et de routage puissante et flexible, le logiciel pfSense comprend une longue liste de fonctionnalités connexes. Le système de package logiciel pfSense permet une plus grande extensibilité sans ajouter de surcharge ni de vulnérabilités de sécurité potentielles à la distribution de base
+Au-delà de ses fonctions de pare-feu et de routeur, pfSense propose de nombreuses fonctionnalités avancées adaptées aussi bien aux particuliers qu'aux entreprises. Il permet notamment de :
 
-![Screenshot](/img/portsentry/image_052.png)
+- Configurer un pare-feu performant.
+- Gérer le routage IPv4 et IPv6.
+- Mettre en place des VPN sécurisés (IPsec, OpenVPN, WireGuard).
+- Configurer le NAT et le Port Forwarding.
+- Gérer les VLAN et plusieurs interfaces réseau.
+- Mettre en œuvre la haute disponibilité (CARP).
+- Contrôler la bande passante et la qualité de service (QoS).
+- Renforcer la sécurité grâce à des packages comme **Snort**, **Suricata** ou **pfBlockerNG**.
+
+L'un des principaux atouts de pfSense est son **gestionnaire de packages**, qui permet d'ajouter facilement de nouvelles fonctionnalités sans compromettre la stabilité ou la sécurité du système.
+
+<div align="center">
+
+![Interface Web de pfSense](/img/portsentry/image_052.png)
+
+_Interface d'administration Web de pfSense (WebGUI)._
+
+</div>
+
+---
+
+## Objectifs de cette documentation
+
+Cette documentation a pour objectif de vous accompagner dans l'installation, la configuration et l'administration de **pfSense**. À la fin de ce guide, vous serez capable de :
+
+- Comprendre l'architecture et le fonctionnement de pfSense.
+- Installer pfSense sur une machine physique ou virtuelle.
+- Réaliser la configuration initiale.
+- Configurer les interfaces WAN, LAN et les VLAN.
+- Créer et gérer des règles de pare-feu.
+- Configurer les services DHCP, DNS et NAT.
+- Déployer des VPN sécurisés.
+- Installer et utiliser les principaux packages.
+- Surveiller et maintenir une infrastructure réseau.
+- Appliquer les bonnes pratiques de sécurité.
+
+---
+
+## À qui s'adresse cette documentation ?
+
+Cette documentation est destinée aux :
+
+- Étudiants en réseaux et cybersécurité.
+- Administrateurs systèmes et réseaux.
+- Professionnels de l'informatique.
+- Passionnés souhaitant découvrir ou approfondir leurs connaissances sur pfSense.
+
+Aucune connaissance approfondie de **FreeBSD** n'est nécessaire. Des notions de base en réseaux informatiques (adressage IP, routage, VLAN, TCP/IP) sont toutefois recommandées pour tirer pleinement parti de cette documentation.

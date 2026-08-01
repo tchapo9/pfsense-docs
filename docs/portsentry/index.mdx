@@ -1,30 +1,58 @@
 ---
-title: "Pfsense Tuto"
+title: "Installation de pfSense"
 ---
 
-> Pfsense
+## Installation et configuration de pfSense
 
-# Installation et Configuration
+Dans ce chapitre, nous allons installer **pfSense**, un pare-feu et routeur open source basé sur **FreeBSD**. L'installation peut être réalisée sur un ordinateur physique ou dans une machine virtuelle telle que **VirtualBox**.
 
-Le site : https://repo.ialab.dsu.edu/pfsense/
-![Screenshot](/img/portsentry/Ok.png)
+L'image ISO officielle de pfSense peut être téléchargée depuis le dépôt suivant :
 
-![Screenshot](/img/portsentry/image_053.png)
+> https://repo.ialab.dsu.edu/pfsense/
 
-# Prérequis Matériels physique
+![Téléchargement de l'image ISO de pfSense](/img/portsentry/Ok.png)
 
-• Un ordinateur
-• Minimum 2 Go de RAM
-• Au moins 8 Go d'espace disque
-• Deux interfaces réseau (WAN et LAN)
-• Une clé USB booter (au moins 4 Go) pour l'installation
+![Versions disponibles de pfSense](/img/portsentry/image_053.png)
 
-# Prérequis sur VirtualBox
+---
 
-• Avoir VirtualBox installé.
-• Ouvrez VirtualBox et cliquez sur "Nouvelle".
-• Montez l'image ISO téléchargée précédemment.
-• Type : Linux
+## Prérequis matériels (installation sur une machine physique)
+
+Avant de commencer l'installation, assurez-vous de disposer des éléments suivants :
+
+- Un ordinateur compatible avec une architecture **64 bits**.
+- **2 Go de mémoire RAM** minimum (4 Go recommandés).
+- **8 Go d'espace disque** minimum.
+- Deux interfaces réseau :
+  - **WAN** : connexion vers Internet.
+  - **LAN** : connexion vers le réseau local.
+- Une clé USB bootable d'au moins **4 Go** contenant l'image ISO de pfSense.
+
+---
+
+## Prérequis pour une installation sous VirtualBox
+
+Si vous souhaitez installer pfSense dans une machine virtuelle, les prérequis sont les suivants :
+
+- Installer **Oracle VirtualBox** sur votre ordinateur.
+- Télécharger l'image **ISO de pfSense**.
+- Créer une nouvelle machine virtuelle.
+- Monter l'image ISO de pfSense dans le lecteur optique virtuel.
+- Configurer les paramètres de la machine virtuelle.
+
+### Configuration recommandée
+
+| Paramètre      | Valeur recommandée                |
+| -------------- | --------------------------------- |
+| Nom            | pfSense                           |
+| Type           | BSD                               |
+| Version        | FreeBSD (64-bit)                  |
+| Mémoire vive   | 2048 Mo minimum                   |
+| Disque dur     | 20 Go (dynamique)                 |
+| Carte réseau 1 | NAT ou Carte en pont (WAN)        |
+| Carte réseau 2 | Réseau interne ou Host-Only (LAN) |
+
+> **Remarque :** Si l'option **FreeBSD (64-bit)** n'apparaît pas dans VirtualBox, vous pouvez sélectionner **Linux (Other Linux 64-bit)**. pfSense fonctionnera correctement, mais l'utilisation de **FreeBSD** reste recommandée lorsqu'elle est disponible.
 
 ## Configuration de l’interface WAN de Pfsense
 
@@ -272,111 +300,329 @@ Close
 
 ![Screenshot](/img/portsentry/image_106.png)
 
-> Proxy
+## Configuration d'un Proxy (HAProxy)
 
-![Screenshot](/img/portsentry/image_107.png)
+Dans une architecture réseau, il est déconseillé d'exposer directement un serveur interne (serveur Web, application, etc.) sur Internet. Une meilleure approche consiste à utiliser un **proxy inverse (Reverse Proxy)**.
 
-![Screenshot](/img/portsentry/image_108.png)
+Le proxy reçoit toutes les requêtes des clients, puis les transmet au serveur interne. Ainsi, les utilisateurs ne communiquent jamais directement avec le serveur final.
 
-![Screenshot](/img/portsentry/image_109.png)
+### Pourquoi utiliser un proxy ?
 
-![Screenshot](/img/portsentry/image_110.png)
+L'utilisation d'un proxy inverse présente plusieurs avantages :
 
-![Screenshot](/img/portsentry/image_111.png)
+- **Masquer l'adresse IP du serveur final** : les clients voient uniquement l'adresse IP de pfSense, jamais celle du serveur interne.
+- **Renforcer la sécurité** : le serveur est isolé du réseau public et ne reçoit pas directement les connexions provenant d'Internet.
+- **Centraliser les accès** : plusieurs serveurs peuvent être publiés derrière une seule adresse IP publique.
+- **Terminer les connexions HTTPS (SSL Offloading)** : le proxy peut gérer les certificats SSL/TLS à la place des serveurs.
+- **Répartir la charge (Load Balancing)** entre plusieurs serveurs.
+- **Filtrer le trafic** avant qu'il n'atteigne les serveurs internes.
 
-![Screenshot](/img/portsentry/image_112.png)
+### Principe de fonctionnement
 
-![Screenshot](/img/portsentry/image_113.png)
-
-![Screenshot](/img/portsentry/image_114.png)
-
-![Screenshot](/img/portsentry/image_115.png)
-
-Config NAT
-
-![Screenshot](/img/portsentry/image_116.png)
-
-![Screenshot](/img/portsentry/image_117.png)
-
-![Screenshot](/img/portsentry/image_118.png)
-
-![Screenshot](/img/portsentry/image_119.png)
-
-![Screenshot](/img/portsentry/image_120.png)
-
-> DMZ
-
-# DMZ vers WAN
-
-Autorisé pour que les services dans la DMZ puissent communiquer avec Internet (par exemple, un serveur web pour des clients externe).
-
-# Limiter ou interdire l'accès de la DMZ au LAN
-
-La DMZ est une zone "exposée" : elle contient des serveurs accessibles depuis Internet (WAN), ce qui la rend plus vulnérable aux attaques.
-
-Si un attaquant prend le contrôle d'un serveur dans la DMZ, il pourrait tenter de l'utiliser comme point d'accès pour pénétrer dans le réseau interne (LAN), où se trouvent les ressources sensibles (données, postes de travail, serveurs internes).
-
-![Screenshot](/img/portsentry/image_121.png)
-
-```bash
-Ip des interfaces du serveur PfSense
+```text
+                Internet
+                    │
+                    ▼
+             Adresse IP Publique
+                    │
+              +-------------+
+              |   pfSense   |
+              |   HAProxy   |
+              +-------------+
+                     │
+                     │
+                     ▼
+               Serveur FTP/SSH
+                 10.10.10.12
 ```
 
-![Screenshot](/img/portsentry/image_122.png)
+Dans cette architecture :
 
-```bash
-IP du serveurWeb dans DMZ
+1. Le client envoie une requête vers l'adresse IP publique de pfSense.
+2. Le NAT redirige la connexion vers le proxy HAProxy.
+3. HAProxy analyse la requête (nom de domaine, port, protocole...).
+4. Il transmet ensuite la requête au serveur approprié.
+5. Le serveur répond à HAProxy.
+6. HAProxy renvoie la réponse au client.
+
+Le client ne connaît jamais l'adresse IP privée des serveurs internes.
+
+---
+
+## Installation et configuration du proxy
+
+Les captures suivantes montrent les différentes étapes de configuration du package **HAProxy** dans pfSense.
+
+![Installation du proxy](/img/portsentry/image_107.png)
+
+![Configuration du proxy](/img/portsentry/image_108.png)
+
+![Configuration du proxy](/img/portsentry/image_109.png)
+
+![Configuration du proxy](/img/portsentry/image_110.png)
+
+![Configuration du proxy](/img/portsentry/image_111.png)
+
+![Configuration du proxy](/img/portsentry/image_112.png)
+
+![Configuration du proxy](/img/portsentry/image_113.png)
+
+![Configuration du proxy](/img/portsentry/image_114.png)
+
+---
+
+## Configuration des règles NAT
+
+Pour que les connexions provenant d'Internet atteignent le proxy, il est nécessaire de créer une règle de **NAT Port Forward**.
+
+Le principe est le suivant :
+
+- les connexions arrivant sur les ports **80 (HTTP)** ou **443 (HTTPS)** de l'adresse IP publique de pfSense ;
+- sont redirigées vers le service **HAProxy** ;
+- HAProxy décide ensuite vers quel serveur interne envoyer la requête.
+
+Les captures suivantes illustrent la configuration des règles NAT.
+
+![Configuration du proxy](/img/portsentry/image_115.png)
+
+![Configuration NAT](/img/portsentry/image_116.png)
+
+![Configuration NAT](/img/portsentry/image_117.png)
+
+![Configuration NAT](/img/portsentry/image_118.png)
+
+![Configuration NAT](/img/portsentry/image_119.png)
+
+![Configuration NAT](/img/portsentry/image_120.png)
+
+---
+
+## Résultat
+
+Après cette configuration :
+
+- Les clients accèdent uniquement à **l'adresse IP publique de pfSense**.
+- Les adresses IP privées des serveurs restent **cachées**.
+- Le proxy contrôle l'ensemble des connexions avant qu'elles n'atteignent les serveurs.
+- L'infrastructure devient plus **sécurisée**, **évolutive** et **facile à administrer**.
+
+## DMZ (Demilitarized Zone)
+
+Une **DMZ (Demilitarized Zone)** est un sous-réseau placé entre le réseau interne (**LAN**) et Internet (**WAN**). Elle est destinée à héberger les services qui doivent être accessibles depuis l'extérieur, tels que :
+
+- Serveur Web (Apache, Nginx)
+- Serveur FTP
+- Serveur de messagerie
+- Serveur DNS public
+- Serveur Proxy
+
+L'objectif principal d'une DMZ est de **protéger le réseau interne** tout en permettant aux utilisateurs externes d'accéder aux services publics.
+
+---
+
+## Architecture
+
+```text
+                  Internet (WAN)
+                         │
+                         │
+                Adresse IP publique
+                         │
+                  +---------------+
+                  |    pfSense    |
+                  +---------------+
+                  │               │
+          LAN     │               │      DMZ
+    10.10.10.0/24 │               │ 20.20.20.0/24
+                  │               │
+          PC Utilisateur       Serveur Web
+                                 Apache
 ```
 
-![Screenshot](/img/portsentry/image_123.png)
+---
+
+## Règles de sécurité
+
+### DMZ → WAN
+
+Les machines situées dans la **DMZ** doivent pouvoir accéder à Internet afin de :
+
+- installer des mises à jour ;
+- télécharger des paquets ;
+- synchroniser l'heure (NTP) ;
+- récupérer des certificats SSL ;
+- communiquer avec des services externes.
+
+Une règle autorisant le trafic **DMZ → WAN** est donc nécessaire.
+
+---
+
+### DMZ → LAN
+
+Le trafic provenant de la **DMZ** vers le **LAN** doit être **strictement limité**, voire totalement interdit.
+
+Pourquoi ?
+
+Les serveurs hébergés dans la DMZ sont exposés à Internet et représentent les premières cibles potentielles des attaques.
+
+Si un attaquant compromet un serveur Web placé dans la DMZ, il pourrait tenter de rebondir vers le réseau interne afin de :
+
+- voler des données sensibles ;
+- compromettre les postes utilisateurs ;
+- attaquer les serveurs internes ;
+- propager un logiciel malveillant.
+
+Pour cette raison, la politique de sécurité recommandée est :
+
+- ✅ WAN → DMZ : autorisé uniquement sur les services publiés (HTTP, HTTPS, etc.).
+- ✅ DMZ → WAN : autorisé.
+- ❌ DMZ → LAN : interdit, sauf exception explicitement autorisée.
+- ❌ WAN → LAN : interdit.
+
+---
+
+## Adressage IP
+
+Les captures suivantes présentent les différentes interfaces utilisées dans cette démonstration.
+
+### Interfaces de pfSense
+
+![Interfaces pfSense](/img/portsentry/image_121.png)
 
 ```bash
-IP du serveur dans le LAN
+Adresses IP des interfaces de pfSense
 ```
 
-![Screenshot](/img/portsentry/image_124.png)
+---
+
+### Serveur Web dans la DMZ
+
+![Serveur Web DMZ](/img/portsentry/image_122.png)
 
 ```bash
-Ip du Client depuis le WAN
+Adresse IP du serveur Web situé dans la DMZ
 ```
 
-![Screenshot](/img/portsentry/image_125.png)
+---
 
-# REGLES A CONFIGURER
+### Serveur du réseau LAN
 
-INTERFACE WAN (rules)
+![Serveur LAN](/img/portsentry/image_123.png)
 
-![Screenshot](/img/portsentry/image_126.png)
+```bash
+Adresse IP du serveur interne
+```
 
-INTERFACE LAN (rules)
+---
 
-![Screenshot](/img/portsentry/image_127.png)
+### Client externe (WAN)
 
-INTERFACE DMZ (rules)
+![Client WAN](/img/portsentry/image_124.png)
 
-![Screenshot](/img/portsentry/image_128.png)
+```bash
+Adresse IP du client situé sur Internet
+```
 
-PORT FORWARDING (NAT)
+---
 
-![Screenshot](/img/portsentry/image_129.png)
+## Configuration des règles du pare-feu
 
-NAT OUTBOUND
+### Interface WAN
 
-![Screenshot](/img/portsentry/image_130.png)
+Autoriser uniquement les connexions destinées au serveur Web publié.
 
-Testez l’accès à Internet depuis la machine du DMZ en faisant la mise à jour des paquets
+![Règles WAN](/img/portsentry/image_126.png)
 
-![Screenshot](/img/portsentry/image_131.png)
+---
 
-Testez la connexion à Apache, depuis une machine du réseau « LAN » en saisissant, dans la barre d’adresses du navigateur, l’IP du ServeurWeb du DMZ (ici http://20.20.20.10) :
+### Interface LAN
 
-![Screenshot](/img/portsentry/image_132.png)
+Autoriser les utilisateurs du réseau interne à accéder aux services de la DMZ si nécessaire.
 
-# Test de l’accès au serveur web depuis l’extérieur :
+![Règles LAN](/img/portsentry/image_127.png)
 
-Depuis un navigateur d’une machine extérieure, saisissez l’adresse IP publique (ou la WAN ou un sousdomaine hébergé) de votre pfSENSE : votre page Apache doit s’afficher :
+---
 
-![Screenshot](/img/portsentry/image_133.png)
+### Interface DMZ
+
+Autoriser les connexions sortantes vers Internet tout en bloquant l'accès au réseau LAN.
+
+![Règles DMZ](/img/portsentry/image_128.png)
+
+---
+
+## Configuration NAT
+
+### Port Forward (NAT)
+
+Le **Port Forward** redirige les requêtes arrivant sur l'adresse IP publique de pfSense vers le serveur Web situé dans la DMZ.
+
+Par exemple :
+
+- WAN :80 → 20.20.20.10:80
+- WAN :443 → 20.20.20.10:443
+
+![Port Forward](/img/portsentry/image_129.png)
+
+---
+
+### NAT Outbound
+
+Le **NAT Outbound** permet aux machines de la DMZ d'accéder à Internet en traduisant leur adresse IP privée en adresse IP publique.
+
+![NAT Outbound](/img/portsentry/image_130.png)
+
+---
+
+## Vérification
+
+### Test de la connexion Internet depuis la DMZ
+
+Depuis le serveur Web, effectuez une mise à jour des paquets afin de vérifier que la machine peut accéder à Internet.
+
+![Test Internet](/img/portsentry/image_131.png)
+
+---
+
+### Test depuis le réseau LAN
+
+Depuis une machine du réseau interne, ouvrez un navigateur puis accédez à l'adresse IP du serveur Web de la DMZ.
+
+```
+http://20.20.20.10
+```
+
+La page Apache doit s'afficher correctement.
+
+![Test LAN](/img/portsentry/image_132.png)
+
+---
+
+### Test depuis Internet (WAN)
+
+Depuis une machine extérieure au réseau, ouvrez un navigateur puis saisissez :
+
+- l'adresse IP publique de pfSense ;
+- ou le nom de domaine associé.
+
+Le trafic est redirigé par le **Port Forward** vers le serveur Web hébergé dans la DMZ.
+
+La page Apache doit alors s'afficher.
+
+![Test WAN](/img/portsentry/image_133.png)
+
+---
+
+## Résultat
+
+Après cette configuration :
+
+- Les utilisateurs d'Internet peuvent accéder au serveur Web de la DMZ.
+- Le serveur Web peut accéder à Internet pour ses mises à jour.
+- Les machines de la DMZ ne peuvent pas accéder au réseau LAN.
+- Le réseau interne reste isolé et protégé, même si un serveur de la DMZ est compromis.
+
+Cette architecture est largement utilisée en entreprise pour publier des services accessibles depuis Internet tout en limitant les risques pour le réseau interne.
 
 > Portail Captif
 
@@ -528,133 +774,278 @@ On redemarre on peut également déconnecter tous les utilisateurs pour qu’il 
 
 ![Screenshot](/img/portsentry/image_167.png)
 
-> Squid
+## Proxy Squid
 
-![Screenshot](/img/portsentry/image_168.png)
+**Squid** est un serveur proxy et un proxy de mise en cache (cache proxy) largement utilisé dans les entreprises. Il permet de contrôler l'accès à Internet, d'améliorer les performances de navigation et de renforcer la sécurité du réseau.
 
-![Screenshot](/img/portsentry/image_169.png)
+Grâce à Squid, les postes clients n'accèdent plus directement aux sites Internet. Toutes les requêtes HTTP et HTTPS transitent par le proxy, qui peut :
 
-![Screenshot](/img/portsentry/image_170.png)
+- Autoriser ou refuser l'accès à certains sites.
+- Mettre en cache les pages Web afin d'accélérer la navigation.
+- Réduire la consommation de bande passante.
+- Enregistrer les connexions des utilisateurs.
+- Appliquer des politiques de sécurité.
 
-Installez ensuite les paquets Lightsquid, SQUID et SQUIDGUARD.
+---
 
-![Screenshot](/img/portsentry/image_170.png)
+## Architecture
 
-![Screenshot](/img/portsentry/image_171.png)
+```text
+                 Internet
+                     │
+                     ▼
+              +---------------+
+              |    pfSense    |
+              |     Squid     |
+              +---------------+
+                     │
+        -----------------------------
+        │             │             │
+      Client 1     Client 2     Client 3
+```
 
-![Screenshot](/img/portsentry/image_172.png)
+Toutes les connexions Web passent par le proxy Squid avant d'être envoyées vers Internet.
 
-![Screenshot](/img/portsentry/image_173.png)
+---
 
-![Screenshot](/img/portsentry/image_174.png)
+## Packages utilisés
 
-![Screenshot](/img/portsentry/image_175.png)
+Cette configuration repose sur trois packages complémentaires.
 
-![Screenshot](/img/portsentry/image_176.png)
+### Squid
 
-Save
+Le package **Squid** fournit le serveur proxy qui intercepte et traite les connexions Web.
 
-![Screenshot](/img/portsentry/image_177.png)
+Ses principales fonctionnalités sont :
 
-![Screenshot](/img/portsentry/image_178.png)
+- Proxy HTTP/HTTPS
+- Cache Web
+- Authentification des utilisateurs
+- Journalisation des connexions
+- Contrôle d'accès
 
-![Screenshot](/img/portsentry/image_179.png)
+---
 
-![Screenshot](/img/portsentry/image_180.png)
+### SquidGuard
 
-![Screenshot](/img/portsentry/image_181.jpeg)
+**SquidGuard** est un module de filtrage qui fonctionne avec Squid.
 
-![Screenshot](/img/portsentry/image_182.jpeg)
+Il permet notamment de :
 
-![Screenshot](/img/portsentry/image_183.jpeg)
+- Bloquer des catégories de sites Internet.
+- Autoriser uniquement certains domaines.
+- Créer des listes blanches (Whitelist).
+- Créer des listes noires (Blacklist).
+- Filtrer les accès selon les utilisateurs ou les groupes.
 
-![Screenshot](/img/portsentry/image_184.jpeg)
+---
 
-![Screenshot](/img/portsentry/image_185.jpeg)
+### Lightsquid
 
-![Screenshot](/img/portsentry/image_186.jpeg)
+**Lightsquid** est un outil d'analyse des journaux de Squid.
 
-![Screenshot](/img/portsentry/image_187.jpeg)
+Il génère des rapports détaillés sur :
 
-![Screenshot](/img/portsentry/image_188.jpeg)
+- les sites consultés ;
+- le volume de données échangées ;
+- les utilisateurs ;
+- les horaires de connexion ;
+- les statistiques de navigation.
 
-![Screenshot](/img/portsentry/image_189.jpeg)
+---
 
-![Screenshot](/img/portsentry/image_190.png)
+# Installation des packages
 
-![Screenshot](/img/portsentry/image_191.png)
+Depuis **System → Package Manager**, installez les packages suivants :
 
-![Screenshot](/img/portsentry/image_192.png)
+- Squid
+- SquidGuard
+- Lightsquid
 
-Save
+Les captures suivantes illustrent la procédure d'installation.
 
-![Screenshot](/img/portsentry/image_193.png)
+![Installation](/img/portsentry/image_168.png)
 
-![Screenshot](/img/portsentry/image_194.png)
+![Installation](/img/portsentry/image_169.png)
 
-![Screenshot](/img/portsentry/image_195.png)
+![Installation](/img/portsentry/image_170.png)
 
-![Screenshot](/img/portsentry/image_196.png)
+Installez ensuite les packages **Lightsquid**, **Squid** et **SquidGuard**.
 
-![Screenshot](/img/portsentry/image_197.png)
+![Installation](/img/portsentry/image_170.png)
 
-![Screenshot](/img/portsentry/image_198.png)
+![Installation](/img/portsentry/image_171.png)
 
-![Screenshot](/img/portsentry/image_199.png)
+![Installation](/img/portsentry/image_172.png)
 
-![Screenshot](/img/portsentry/image_200.png)
+![Installation](/img/portsentry/image_173.png)
 
-![Screenshot](/img/portsentry/image_201.png)
+![Installation](/img/portsentry/image_174.png)
 
-![Screenshot](/img/portsentry/image_202.png)
+![Installation](/img/portsentry/image_175.png)
 
-URL pour télécharger un ensemble de site à bloquer https://dsi.ut-capitole.fr/blacklists/download/
+![Installation](/img/portsentry/image_176.png)
 
-![Screenshot](/img/portsentry/image_203.png)
+Enregistrez la configuration.
 
+![Save](/img/portsentry/image_177.png)
+
+---
+
+# Configuration de Squid
+
+Configurez le proxy en activant le service, en choisissant les interfaces réseau concernées et en définissant les paramètres de fonctionnement.
+
+Les captures suivantes présentent les différentes options disponibles.
+
+![Configuration](/img/portsentry/image_178.png)
+
+![Configuration](/img/portsentry/image_179.png)
+
+![Configuration](/img/portsentry/image_180.png)
+
+![Configuration](/img/portsentry/image_181.jpeg)
+
+![Configuration](/img/portsentry/image_182.jpeg)
+
+![Configuration](/img/portsentry/image_183.jpeg)
+
+![Configuration](/img/portsentry/image_184.jpeg)
+
+![Configuration](/img/portsentry/image_185.jpeg)
+
+![Configuration](/img/portsentry/image_186.jpeg)
+
+![Configuration](/img/portsentry/image_187.jpeg)
+
+![Configuration](/img/portsentry/image_188.jpeg)
+
+![Configuration](/img/portsentry/image_189.jpeg)
+
+![Configuration](/img/portsentry/image_190.png)
+
+![Configuration](/img/portsentry/image_191.png)
+
+![Configuration](/img/portsentry/image_192.png)
+
+Enregistrez les modifications.
+
+![Save](/img/portsentry/image_193.png)
+
+---
+
+# Configuration de SquidGuard
+
+Une fois Squid opérationnel, configurez **SquidGuard** afin de contrôler les sites autorisés ou interdits.
+
+Les captures suivantes montrent les différentes étapes de configuration.
+
+![SquidGuard](/img/portsentry/image_194.png)
+
+![SquidGuard](/img/portsentry/image_195.png)
+
+![SquidGuard](/img/portsentry/image_196.png)
+
+![SquidGuard](/img/portsentry/image_197.png)
+
+![SquidGuard](/img/portsentry/image_198.png)
+
+![SquidGuard](/img/portsentry/image_199.png)
+
+![SquidGuard](/img/portsentry/image_200.png)
+
+![SquidGuard](/img/portsentry/image_201.png)
+
+![SquidGuard](/img/portsentry/image_202.png)
+
+---
+
+# Téléchargement des listes de blocage
+
+SquidGuard utilise des **blacklists** afin de bloquer automatiquement certaines catégories de sites.
+
+Une source largement utilisée est :
+
+> https://dsi.ut-capitole.fr/blacklists/download/
+
+Par exemple, pour bloquer les sites de discussion ("chat"), utilisez :
+
+```
 http://dsi.ut-capitole.fr/blacklists/download/chat.tar.gz
+```
 
-![Screenshot](/img/portsentry/image_204.png)
+Les captures suivantes illustrent le téléchargement et l'importation de cette liste.
 
-![Screenshot](/img/portsentry/image_205.png)
+![Blacklist](/img/portsentry/image_203.png)
 
-![Screenshot](/img/portsentry/image_206.png)
+![Blacklist](/img/portsentry/image_204.png)
 
-![Screenshot](/img/portsentry/image_207.png)
+![Blacklist](/img/portsentry/image_205.png)
 
-![Screenshot](/img/portsentry/image_208.png)
+![Blacklist](/img/portsentry/image_206.png)
 
-![Screenshot](/img/portsentry/image_209.png)
+![Blacklist](/img/portsentry/image_207.png)
 
-![Screenshot](/img/portsentry/image_210.png)
+![Blacklist](/img/portsentry/image_208.png)
 
-![Screenshot](/img/portsentry/image_211.png)
+![Blacklist](/img/portsentry/image_209.png)
 
-![Screenshot](/img/portsentry/image_212.png)
+![Blacklist](/img/portsentry/image_210.png)
 
-![Screenshot](/img/portsentry/image_213.png)
+![Blacklist](/img/portsentry/image_211.png)
 
-![Screenshot](/img/portsentry/image_214.png)
+![Blacklist](/img/portsentry/image_212.png)
 
-![Screenshot](/img/portsentry/image_215.png)
+![Blacklist](/img/portsentry/image_213.png)
 
-![Screenshot](/img/portsentry/image_216.jpeg)
+![Blacklist](/img/portsentry/image_214.png)
 
-![Screenshot](/img/portsentry/image_217.png)
+![Blacklist](/img/portsentry/image_215.png)
 
-![Screenshot](/img/portsentry/image_218.png)
+---
 
-![Screenshot](/img/portsentry/image_219.jpeg)
+# Génération des rapports avec Lightsquid
 
-![Screenshot](/img/portsentry/image_220.png)
+Après quelques connexions des utilisateurs, **Lightsquid** permet de générer des rapports détaillés sur l'utilisation du proxy.
 
-![Screenshot](/img/portsentry/image_221.png)
+Les rapports affichent notamment :
 
-![Screenshot](/img/portsentry/image_222.png)
+- les utilisateurs ;
+- les sites consultés ;
+- le nombre de connexions ;
+- le volume de données échangées ;
+- les statistiques de navigation.
 
-![Screenshot](/img/portsentry/image_223.png)
+Les captures suivantes présentent l'interface de Lightsquid.
 
-![Screenshot](/img/portsentry/image_224.png)
+![Lightsquid](/img/portsentry/image_216.jpeg)
+
+![Lightsquid](/img/portsentry/image_217.png)
+
+![Lightsquid](/img/portsentry/image_218.png)
+
+![Lightsquid](/img/portsentry/image_219.jpeg)
+
+![Lightsquid](/img/portsentry/image_220.png)
+
+![Lightsquid](/img/portsentry/image_221.png)
+
+![Lightsquid](/img/portsentry/image_222.png)
+
+![Lightsquid](/img/portsentry/image_223.png)
+
+![Lightsquid](/img/portsentry/image_224.png)
+
+---
+
+## Résultat
+
+Après cette configuration :
+
+- Toutes les connexions Web transitent par le proxy Squid.
+- Les sites interdits sont automatiquement bloqués grâce à SquidGuard.
+- Les administrateurs disposent de rapports détaillés via Lightsquid.
+- La navigation Internet est plus sécurisée et plus facile à contrôler.
 
 > OpenVPN
 
