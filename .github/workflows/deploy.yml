@@ -38,11 +38,6 @@ jobs:
         with:
           publish_branch: gh-pages
           publish_dir: ./build
-          # Prefer a personal access token stored in secrets.PERSONAL_TOKEN.
-          # If not provided, the action will attempt to use the automatically
-          # provided GITHUB_TOKEN, but that token may be restricted by repo
-          # settings. Create a PAT with `repo` and `workflow` scopes and save it
-          # as the repository secret named `PERSONAL_TOKEN` for reliable pushes.
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user_name: "github-actions[bot]"
