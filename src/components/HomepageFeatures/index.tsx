@@ -12,7 +12,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Guide pfSense complet',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/pfsense_installation_guide.svg').default,
     description: (
       <>
         Toutes les étapes de l'installation pfSense, de la configuration LAN/WAN
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Sécurisation réseau',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/pfsense-performance-fiabilite-reseaux.svg').default,
     description: (
       <>
         Configuration des règles firewall, DMZ, proxy et NAT pour un réseau fiable
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'VPN et accès distant',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/openvpn_pfsense0.svg').default,
     description: (
       <>
         Mise en place d’OpenVPN, export de configuration et tests d’accès depuis
