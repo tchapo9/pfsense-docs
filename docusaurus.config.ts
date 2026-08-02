@@ -21,6 +21,14 @@ const config: Config = {
   baseUrl: '/pfsense-docs/',
   trailingSlash: false,
 
+  scripts: [
+    {
+      src: 'https://cloud.umami.cloud/script.js',
+      async: true,
+      'data-website-id': '4a82ff80-e7a5-43dc-a506-ba15858e3560',
+    },
+  ],
+
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'tchapo9', // Usually your GitHub org/user name.
