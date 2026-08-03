@@ -26,15 +26,6 @@ const config: Config = {
   organizationName: 'tchapo9', // Usually your GitHub org/user name.
   projectName: 'pfsense-docs', // Usually your repo name.
 
-  plugins: [
-    [
-      '@docusaurus/plugin-google-gtag',
-      {
-        trackingID: 'G-V5541WGZ0E',
-        anonymizeIP: true,
-      },
-    ],
-  ],
 
   onBrokenLinks: 'throw',
 
